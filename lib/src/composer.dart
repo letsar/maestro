@@ -24,7 +24,7 @@ mixin Composer implements Performer {
 
   /// Writes the value of the nearest [Maestro<T>] ancestor in the tree.
   @protected
-  void write<T>(T value) => _score.write(value);
+  void write<T>(T value, [String action]) => _score.write(value, action);
 
   @override
   void detach() {}

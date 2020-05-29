@@ -65,8 +65,8 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
   /// {@template maestro.write}
   /// Sets the value from the nearest ancestor [Maestro<T>].
   /// {@endtemplate}
-  static void write<T>(BuildContext context, T value) {
-    context.write(value);
+  static void write<T>(BuildContext context, T value, [Object action]) {
+    context.write(value, action);
   }
 
   /// {@template maestro.readAndWrite}
@@ -74,9 +74,10 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
   /// {@endtemplate}
   static void readAndWrite<T>(
     BuildContext context,
-    T Function(T current) updater,
-  ) {
-    context.readAndWrite(updater);
+    Updater<T> updater, [
+    Object action,
+  ]) {
+    context.readAndWrite(updater, action);
   }
 
   /// {@template maestro.select}
@@ -128,13 +129,13 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
 
   T get value => _value;
   T _value;
-  set value(T value) {
+  void _dispatch(_Wrapper<T> wrapper) {
     final T oldValue = _value;
 
     setState(() {
-      _value = value;
+      _value = wrapper.value;
     });
-    _inspector?.onValueUpdated(oldValue, value);
+    _inspector?.onAction(oldValue, value, wrapper.action);
   }
 
   @override
@@ -165,10 +166,19 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
   }
 
   @override
-  X read<X>() => Maestro.read<X>(context);
+  X read<X>() {
+    return Maestro.read<X>(context);
+  }
 
   @override
-  void write<X>(X value) => Maestro.write<X>(context, value);
+  void readAndWrite<X>(Updater<X> updater, [Object action]) {
+    Maestro.readAndWrite<X>(context, updater, action);
+  }
+
+  @override
+  void write<X>(X value, [Object action]) {
+    Maestro.write<X>(context, value, action);
+  }
 
   bool _updateShouldNotify(T oldValue, T newValue) {
     if (widget.equalityComparer != null) {
@@ -186,6 +196,13 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
       child: widget.child,
     );
   }
+}
+
+@immutable
+class _Wrapper<T> {
+  const _Wrapper(this.value, this.action);
+  final Object action;
+  final T value;
 }
 
 class _MaestroScope<T> extends InheritedModel<_Aspect<T, dynamic>> {
@@ -262,14 +279,14 @@ extension MaestroBuildContextExtensions on BuildContext {
 
   // ignore: use_setters_to_change_properties
   /// {@macro  maestro.write}
-  void write<T>(T value) {
-    _getMaestroScope<T>()?.state?.value = value;
+  void write<T>(T value, [Object action]) {
+    _getMaestroScope<T>()?.state?._dispatch(_Wrapper<T>(value, action));
   }
 
   /// {@macro  maestro.readAndWrite}
-  void readAndWrite<T>(T Function(T current) updater) {
+  void readAndWrite<T>(Updater<T> updater, [Object action]) {
     final _MaestroScope<T> scope = _getMaestroScope<T>();
-    scope.state.value = updater(scope.value);
+    scope.state._dispatch(_Wrapper<T>(updater(scope.value), action));
   }
 
   /// {@macro  maestro.select}

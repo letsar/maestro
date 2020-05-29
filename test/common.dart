@@ -6,7 +6,7 @@ Type typeOf<T>() => T;
 
 class DefaultComposer with Composer {
   T fetch<T>() => read<T>();
-  void store<T>(T value) => write(value);
+  void store<T>(T value, [String action]) => write(value, action);
 }
 
 Matcher matchesInOrder(List<Matcher> matchers) {

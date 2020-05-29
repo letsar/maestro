@@ -1,28 +1,27 @@
-typedef OnValueUpdated = void Function<T>(T oldValue, T value);
+typedef OnAction = void Function<T>(T oldValue, T value, Object action);
 
 /// A special kind of component which can be used to inspect all value changes
 /// in the tree.
 ///
 /// All [Maestro]s will look to the nearest [Maestro] ancestor with a
-/// [MaestroInspector] value in the tree and call its [onValueUpdated] method
+/// [MaestroInspector] value in the tree and call its [onAction] method
 /// whenever the [Maestro]'s value changed.
 abstract class MaestroInspector {
   /// Creates a [MaestroInspector].
-  const factory MaestroInspector(OnValueUpdated onValueUpdated) =
+  const factory MaestroInspector(OnAction onAction) =
       _DelegatedMaestroInspector;
 
   /// Called every time the value of a [Maestro] child changes.
-  void onValueUpdated<T>(T oldValue, T value);
+  void onAction<T>(T oldValue, T value, Object action);
 }
 
 class _DelegatedMaestroInspector implements MaestroInspector {
-  const _DelegatedMaestroInspector(this._onValueUpdated)
-      : assert(_onValueUpdated != null);
+  const _DelegatedMaestroInspector(this._onAction) : assert(_onAction != null);
 
-  final OnValueUpdated _onValueUpdated;
+  final OnAction _onAction;
 
   @override
-  void onValueUpdated<T>(T oldValue, T value) {
-    _onValueUpdated(oldValue, value);
+  void onAction<T>(T oldValue, T value, Object action) {
+    _onAction(oldValue, value, action);
   }
 }

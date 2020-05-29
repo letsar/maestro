@@ -137,11 +137,11 @@ All `Maestro`s can report when their value changed to the nearest `Maestro<Maest
 You can declare an inspector like this:
 
 ```dart
-void onValueUpdated<T>(T oldValue, T newValue) => print('from $oldValue to $newValue');
+void onAction<T>(T oldValue, T newValue, Object action) => print('$action initiated a change from $oldValue to $newValue');
 ...
 Maestros(
   [
-    Maestro(MaestroInspector(onValueUpdated)),
+    Maestro(MaestroInspector(onAction)),
     Maestro(Data())
     Maestro(Composer())
     ...
@@ -149,6 +149,8 @@ Maestros(
   child : SubTree(),
 )
 ```
+
+Then when you use `write` or `readAndWrite` you can pass an optional object called `action`. This action will be provided to the inspector so that you can log the action along with the previous and current values.
 
 ## Changelog
 

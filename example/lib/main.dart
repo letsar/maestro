@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       [
         // This is a special component used to listen any changes from
         // Maestro descendants.
-        const Maestro(MaestroInspector(_onValueUpdated)),
+        const Maestro(MaestroInspector(_onAction)),
 
         // This is how we expose data.
         const Maestro(Counter(0)),
@@ -139,10 +139,10 @@ class CounterComposer with Composer {
     final Counter incrementedCounter = Counter(_counter.value + 1);
 
     // We write the new value.
-    write(incrementedCounter);
+    write(incrementedCounter, 'counter.increment');
   }
 }
 
-void _onValueUpdated<T>(T oldValue, T value) {
-  debugPrint('Transition from $oldValue to $value');
+void _onAction<T>(T oldValue, T value, Object action) {
+  debugPrint('$action made a transition from $oldValue to $value');
 }
