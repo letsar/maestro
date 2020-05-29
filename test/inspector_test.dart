@@ -10,7 +10,7 @@ void main() {
         (tester) async {
       final List<String> logs = <String>[];
 
-      void onAction<T>(T old, T value, String action) {
+      void onAction<T>(T old, T value, Object action) {
         logs.add('$old => $value');
       }
 
@@ -41,7 +41,7 @@ void main() {
     testWidgets('method is called with action name', (tester) async {
       final List<String> logs = <String>[];
 
-      void onAction<T>(T old, T value, String action) {
+      void onAction<T>(T old, T value, Object action) {
         logs.add('$action: $old => $value');
       }
 

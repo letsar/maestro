@@ -1,3 +1,7 @@
+## [0.1.1]
+### Fix
+- Make the action an `Object` everywhere.
+
 ## [0.1.0]
 ### Added
 - An `Object` parameter to `write` and `readAndWrite` methods, in order to indicate what the action is.
