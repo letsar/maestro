@@ -1,0 +1,17 @@
+name: maestro
+description: A way to orchestrate your app's state and to expose your data across your entire Flutter application.
+version: 0.0.1
+homepage: https://github.com/letsar/maestro
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: '>= 1.12.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  collection: ^1.14.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
