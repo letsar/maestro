@@ -37,3 +37,10 @@ abstract class Relocatable<T extends Widget> {
   /// Creates a new widget of type [T] with the specified [newChild].
   T copyWithNewChild(Widget newChild);
 }
+
+/// A specific action when a value is updated due to a widget which was updated.
+@immutable
+class WidgetUpdatedAction {
+  /// Creates a [WidgetUpdatedAction].
+  const WidgetUpdatedAction();
+}

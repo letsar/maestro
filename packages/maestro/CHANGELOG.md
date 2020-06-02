@@ -1,5 +1,9 @@
+## [0.2.0]
+### Changed
+- The value held by a `Maestro` is now updated when the `initialValue` changed and if it's not a `Performer`.
+
 ## [0.1.1]
-### Fix
+### Fixed
 - Make the action an `Object` everywhere.
 
 ## [0.1.0]

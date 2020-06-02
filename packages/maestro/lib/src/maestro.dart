@@ -151,6 +151,16 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
   }
 
   @override
+  void didUpdateWidget(Maestro<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final T newValue = widget.initialValue;
+    if (newValue is! Performer && _updateShouldNotify(value, newValue)) {
+      // Only the widgets where values are not a Performer update their value.
+      _dispatch(_Wrapper<T>(newValue, const WidgetUpdatedAction()));
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _inspector = Maestro.listen<MaestroInspector>(context);
