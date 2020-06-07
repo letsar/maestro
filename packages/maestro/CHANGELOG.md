@@ -1,3 +1,8 @@
+## [0.3.0]
+### Changed
+- `MaestroInspector` can be used multiple times and can decide to bubble action to further ancestors.
+- `OnAction` return type to bool, in order to continue/cancel bubbling.
+
 ## [0.2.0]
 ### Changed
 - The value held by a `Maestro` is now updated when the `initialValue` changed and if it's not a `Performer`.

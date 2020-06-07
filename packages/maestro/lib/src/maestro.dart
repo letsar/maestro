@@ -125,8 +125,6 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
 }
 
 class _MaestroState<T> extends State<Maestro<T>> implements Score {
-  MaestroInspector _inspector;
-
   T get value => _value;
   T _value;
   void _dispatch(_Wrapper<T> wrapper) {
@@ -135,7 +133,17 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
     setState(() {
       _value = wrapper.value;
     });
-    _inspector?.onAction(oldValue, value, wrapper.action);
+    _inspect(oldValue, value, wrapper.action);
+  }
+
+  void _inspect(T oldValue, T value, Object action) {
+    bool bubbling = true;
+    _MaestroScope<MaestroInspector> inspector =
+        context._getMaestroScope<MaestroInspector>();
+    while (inspector != null && bubbling) {
+      bubbling = !inspector.value.onAction(oldValue, value, action);
+      inspector = inspector.state.context._getMaestroScope<MaestroInspector>();
+    }
   }
 
   @override
@@ -158,12 +166,6 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
       // Only the widgets where values are not a Performer update their value.
       _dispatch(_Wrapper<T>(newValue, const WidgetUpdatedAction()));
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _inspector = Maestro.listen<MaestroInspector>(context);
   }
 
   @override

@@ -143,6 +143,7 @@ class CounterComposer with Composer {
   }
 }
 
-void _onAction<T>(T oldValue, T value, Object action) {
+bool _onAction<T>(T oldValue, T value, Object action) {
   debugPrint('$action made a transition from $oldValue to $value');
+  return true;
 }
