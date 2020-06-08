@@ -1,4 +1,11 @@
-typedef OnAction = void Function<T>(T oldValue, T value, Object action);
+/// Signature for logging an action.
+///
+/// Return true to cancel the action bubbling.
+/// Return false to allow the action to continue to be dispatched to further
+/// ancestors.
+///
+/// Used by [MaestroInspector].
+typedef OnAction = bool Function<T>(T oldValue, T value, Object action);
 
 /// A special kind of component which can be used to inspect all value changes
 /// in the tree.
@@ -12,7 +19,11 @@ abstract class MaestroInspector {
       _DelegatedMaestroInspector;
 
   /// Called every time the value of a [Maestro] child changes.
-  void onAction<T>(T oldValue, T value, Object action);
+  ///
+  /// Return true to cancel the action bubbling.
+  /// Return false to allow the action to continue to be dispatched to further
+  /// ancestors.
+  bool onAction<T>(T oldValue, T value, Object action);
 }
 
 class _DelegatedMaestroInspector implements MaestroInspector {
@@ -21,7 +32,7 @@ class _DelegatedMaestroInspector implements MaestroInspector {
   final OnAction _onAction;
 
   @override
-  void onAction<T>(T oldValue, T value, Object action) {
-    _onAction(oldValue, value, action);
+  bool onAction<T>(T oldValue, T value, Object action) {
+    return _onAction(oldValue, value, action);
   }
 }

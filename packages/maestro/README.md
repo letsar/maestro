@@ -124,10 +124,6 @@ FloatingActionButton(
 
 To execute some code when the `Composer` is initialized, you can override the `play` method.
 
-## Limitations
-
-If the `Maestro` is rebuilt with a different `initialValue`, the current value is also updated only if it is not a `Performer` or a `Composer`.
-
 ## Advanced use
 
 ### MaestroInspector
@@ -137,7 +133,10 @@ All `Maestro`s can report when their value changed to the nearest `Maestro<Maest
 You can declare an inspector like this:
 
 ```dart
-void onAction<T>(T oldValue, T newValue, Object action) => print('$action initiated a change from $oldValue to $newValue');
+bool onAction<T>(T oldValue, T newValue, Object action){
+  print('$action initiated a change from $oldValue to $newValue');
+  return false;
+}
 ...
 Maestros(
   [
@@ -151,6 +150,8 @@ Maestros(
 ```
 
 Then when you use `write` or `readAndWrite` you can pass an optional object called `action`. This action will be provided to the inspector so that you can log the action along with the previous and current values.
+
+You can have multiple `MaestroInspector` in the tree. The action is bubbling up until there is one `MaestroInspector` which returns true.
 
 ## Changelog
 
