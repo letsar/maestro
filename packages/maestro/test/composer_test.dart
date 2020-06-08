@@ -12,11 +12,6 @@ class _FetchWhenAttachedComposer<T> with Composer {
   void play() {
     fetch(read<T>());
   }
-
-  @override
-  void remix(_FetchWhenAttachedComposer old) {
-    fetch(read<T>());
-  }
 }
 
 void main() {
@@ -46,7 +41,9 @@ void main() {
         ),
       );
 
-      expect(value, equals(2));
+      // The new instance does not replace the old one, and the play method
+      // is not called.
+      expect(value, equals(1));
     });
 
     testWidgets('can write an ancestor maestro', (tester) async {

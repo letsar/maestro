@@ -13,9 +13,6 @@ class DefaultPerfomer implements Performer {
 
   @override
   FutureOr<void> play() {}
-
-  @override
-  void remix(DefaultPerfomer old) {}
 }
 
 void main() {
@@ -86,7 +83,7 @@ void main() {
       expect(value, equals(168));
     });
 
-    testWidgets('rebuilt if value changed', (tester) async {
+    testWidgets('does not rebuilt if value changed', (tester) async {
       int buildCount = 0;
 
       final Widget child = Builder(
@@ -101,6 +98,9 @@ void main() {
       expect(buildCount, equals(1));
 
       await tester.pumpWidget(Maestro(84, child: child));
+      expect(buildCount, equals(1));
+
+      await tester.pumpWidget(Maestro(84, key: UniqueKey(), child: child));
       expect(buildCount, equals(2));
     });
   });

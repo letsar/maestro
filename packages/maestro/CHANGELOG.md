@@ -1,3 +1,7 @@
+## [0.5.0]
+### Changed
+- Revert the possibility to update `Maestro` value without setting a new key. 
+
 ## [0.4.0]
 ### Added
 - A `remix` method on `Performer` called when a `Performer` instance changed and the new one need to be updated from the old one.

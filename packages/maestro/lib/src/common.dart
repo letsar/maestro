@@ -38,13 +38,6 @@ abstract class Performer {
   /// This is called internally. You should not call this method.
   FutureOr<void> play();
 
-  /// Called when the [Performer] is updated.
-  /// This can be overriden to copy the 'state' of the previous [Performer] into
-  /// the new one.
-  ///
-  /// This is called internally. You should not call this method.
-  void remix(covariant Performer old);
-
   /// Called when the [Performer] is removed from the tree.
   ///
   /// This is called internally. You should not call this method.

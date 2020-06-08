@@ -16,9 +16,6 @@ mixin Composer implements Performer {
   @override
   FutureOr<void> play() {}
 
-  @override
-  void remix(covariant Composer old) {}
-
   /// Reads the value of the nearest [Maestro<T>] ancestor in the tree.
   @protected
   T read<T>() => _score.read<T>();
