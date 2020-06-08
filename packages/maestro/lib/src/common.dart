@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 /// A predicate to determine if to value are considered equals.
@@ -25,10 +27,28 @@ abstract class Score {
 /// ancestors.
 abstract class Performer {
   /// Called when the [Performer] is added in the tree.
-  void attach(Score score) {}
+  ///
+  /// This is called internally. You should not call this method.
+  void attach(Score score);
+
+  /// Called the first time the [Performer] is added in the tree.
+  /// This can be overriden to perform an action when the [Performer] is added
+  /// the first time in the tree. Loading data and update a model for example.
+  ///
+  /// This is called internally. You should not call this method.
+  FutureOr<void> play();
+
+  /// Called when the [Performer] is updated.
+  /// This can be overriden to copy the 'state' of the previous [Performer] into
+  /// the new one.
+  ///
+  /// This is called internally. You should not call this method.
+  void remix(covariant Performer old);
 
   /// Called when the [Performer] is removed from the tree.
-  void detach() {}
+  ///
+  /// This is called internally. You should not call this method.
+  void detach();
 }
 
 /// An interface for widgets, with one child, able to be relocated at another

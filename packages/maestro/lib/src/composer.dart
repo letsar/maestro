@@ -11,12 +11,13 @@ mixin Composer implements Performer {
   @override
   void attach(Score score) {
     _score = score;
-    play();
   }
 
-  /// Called when the composer can read the score.
-  @protected
+  @override
   FutureOr<void> play() {}
+
+  @override
+  void remix(covariant Composer old) {}
 
   /// Reads the value of the nearest [Maestro<T>] ancestor in the tree.
   @protected

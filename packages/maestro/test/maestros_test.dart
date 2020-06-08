@@ -39,8 +39,7 @@ void main() {
       final Type type = typeOf<Maestro<int>>();
 
       Matcher _matcher(int value) {
-        return isA<Maestro<int>>()
-            .having((x) => x.initialValue, 'initialValue', value);
+        return isA<Maestro<int>>().having((x) => x.value, 'value', value);
       }
 
       expect(
@@ -74,7 +73,7 @@ void main() {
 
       Matcher _matcher(int value) {
         return isA<Maestro<int>>()
-            .having((x) => x.initialValue, 'initialValue', value)
+            .having((x) => x.value, 'value', value)
             .having((x) => x.key, 'key', key)
             .having((x) => x.equalityComparer, 'equalityComparer', comparer);
       }

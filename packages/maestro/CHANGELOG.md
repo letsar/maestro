@@ -1,3 +1,12 @@
+## [0.4.0]
+### Added
+- A `remix` method on `Performer` called when a `Performer` instance changed and the new one need to be updated from the old one.
+- The value held by a `Maestro` is now updated when the `value` changed, whether it's a `Performer` or not.
+
+### Changed
+- The `play` method is now on the `Performer`.
+- `initialValue` of `Maestro` is renamed `value`.
+
 ## [0.3.0]
 ### Changed
 - `MaestroInspector` can be used multiple times and can decide to bubble action to further ancestors.

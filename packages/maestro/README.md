@@ -124,10 +124,6 @@ FloatingActionButton(
 
 To execute some code when the `Composer` is initialized, you can override the `play` method.
 
-## Limitations
-
-If the `Maestro` is rebuilt with a different `initialValue`, the current value is also updated only if it is not a `Performer` or a `Composer`.
-
 ## Advanced use
 
 ### MaestroInspector
