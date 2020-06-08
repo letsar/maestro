@@ -8,13 +8,11 @@ class _DelegatedPerformer implements Performer {
   const _DelegatedPerformer(
     this.onAttach,
     this.onPlay,
-    this.onRemix,
     this.onDetach,
   );
 
   final void Function(Score score) onAttach;
   final void Function() onPlay;
-  final void Function(_DelegatedPerformer old) onRemix;
   final VoidCallback onDetach;
 
   @override
@@ -22,9 +20,6 @@ class _DelegatedPerformer implements Performer {
 
   @override
   FutureOr<void> play() async => onPlay();
-
-  @override
-  void remix(_DelegatedPerformer old) => onRemix(old);
 
   @override
   void detach() => onDetach();
@@ -40,7 +35,6 @@ void main() {
         (i) => _DelegatedPerformer(
           (score) => logs.add('attach $i'),
           () => logs.add('play $i'),
-          (_DelegatedPerformer old) => logs.add('remix $i'),
           () => logs.add('detach $i'),
         ),
       );
@@ -71,10 +65,23 @@ void main() {
         ),
       );
 
+      expect(logs, <String>[]);
+      logs.clear();
+
+      await tester.pumpWidget(
+        Maestros(
+          [
+            const Maestro(1),
+            Maestro(performers[1], key: UniqueKey()),
+          ],
+          child: const SizedBox(),
+        ),
+      );
+
       expect(logs, <String>[
         'attach 1',
-        'remix 1',
         'detach 0',
+        'play 1',
       ]);
       logs.clear();
 

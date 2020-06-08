@@ -8,7 +8,7 @@ import 'package:maestro/src/inspector.dart';
 /// Its descendants can read the value or write a new value. When the value is
 /// replaced, all descendants who listen a specific [Maestro] will be rebuilt.
 class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
-  /// Stores the [value] and exposes it to its descendants.
+  /// Stores the [initialValue] and exposes it to its descendants.
   ///
   /// `equalityComparer` can optionally be passed to avoid unnecessarily
   /// rebuilding dependents when [Maestro] is rebuilt but its `value`
@@ -16,14 +16,14 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
   ///
   /// Defaults to `(previous, next) => previous != next`.
   const Maestro(
-    this.value, {
+    this.initialValue, {
     Key key,
     this.equalityComparer,
     this.child,
   }) : super(key: key);
 
   /// The initial value held by this widget.
-  final T value;
+  final T initialValue;
 
   /// Used to compare old and new values in order to rebuild its descendants
   /// only when these values are not considered equals.
@@ -39,7 +39,7 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
   @override
   Maestro<T> copyWithNewChild(Widget newChild) {
     return Maestro<T>(
-      value,
+      initialValue,
       key: key,
       equalityComparer: equalityComparer,
       child: newChild,
@@ -149,30 +149,13 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
   @override
   void initState() {
     super.initState();
-    _value = widget.value;
+    _value = widget.initialValue;
     final T value = _value;
     if (value is Performer) {
       value.attach(this);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         value.play();
       });
-    }
-  }
-
-  @override
-  void didUpdateWidget(Maestro<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final T newValue = widget.value;
-    if (_updateShouldNotify(value, newValue)) {
-      if (newValue is Performer) {
-        newValue.attach(this);
-        final T oldValue = value;
-        if (oldValue is Performer) {
-          newValue.remix(oldValue);
-          oldValue.detach();
-        }
-      }
-      _dispatch(_Wrapper<T>(newValue, const WidgetUpdatedAction()));
     }
   }
 

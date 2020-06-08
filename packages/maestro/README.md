@@ -124,6 +124,11 @@ FloatingActionButton(
 
 To execute some code when the `Composer` is initialized, you can override the `play` method.
 
+## Limitations
+
+The value passed to a `Maestro` is only used for its initial state. Therefore if you want to change the current value from a parent you need to pass a different key to the `Maestro` in order to replace the old `Maestro` by the new one.
+
+
 ## Advanced use
 
 ### MaestroInspector
