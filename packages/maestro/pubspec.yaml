@@ -1,6 +1,6 @@
 name: maestro
 description: A way to orchestrate your app's state and to expose your data across your entire Flutter application.
-version: 0.5.0
+version: 0.6.0
 homepage: https://github.com/letsar/maestro
 
 environment:

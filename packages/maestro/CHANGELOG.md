@@ -1,3 +1,7 @@
+## [0.6.0]
+### Added
+- A `readOnly` constructor on `Maestro` allowing a `Maestro` to be read but not updated by its descendants, and only updated by its parent.
+
 ## [0.5.0]
 ### Changed
 - Revert the possibility to update `Maestro` value without setting a new key. 
