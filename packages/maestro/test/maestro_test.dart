@@ -83,7 +83,26 @@ void main() {
       expect(value, equals(168));
     });
 
-    testWidgets('does not rebuilt if value changed', (tester) async {
+    testWidgets('descendants cannot write a read-only ancestor',
+        (tester) async {
+      int buildCount = 0;
+      BuildContext ctx;
+      final Widget child = Builder(
+        builder: (context) {
+          ctx = context;
+          buildCount++;
+          Maestro.read<int>(context);
+          return const SizedBox();
+        },
+      );
+
+      await tester.pumpWidget(Maestro.readOnly(42, child: child));
+      expect(buildCount, equals(1));
+      expect(() => Maestro.write(ctx, 84), throwsAssertionError);
+    });
+
+    testWidgets('does not rebuilt if value changed and writeable',
+        (tester) async {
       int buildCount = 0;
 
       final Widget child = Builder(
@@ -102,6 +121,29 @@ void main() {
 
       await tester.pumpWidget(Maestro(84, key: UniqueKey(), child: child));
       expect(buildCount, equals(2));
+    });
+
+    testWidgets('does rebuilt if value changed and read-only', (tester) async {
+      int value = 0;
+      int buildCount = 0;
+
+      final Widget child = Builder(
+        builder: (context) {
+          buildCount++;
+          value = Maestro.listen<int>(context);
+          return const SizedBox();
+        },
+      );
+
+      expect(value, equals(0));
+
+      await tester.pumpWidget(Maestro.readOnly(42, child: child));
+      expect(buildCount, equals(1));
+      expect(value, equals(42));
+
+      await tester.pumpWidget(Maestro.readOnly(84, child: child));
+      expect(buildCount, equals(2));
+      expect(value, equals(84));
     });
   });
 }

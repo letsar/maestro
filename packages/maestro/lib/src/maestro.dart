@@ -15,15 +15,60 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
   /// did not change.
   ///
   /// Defaults to `(previous, next) => previous != next`.
+  ///
+  /// Its internal value can only be udpated by descendants using the [write]
+  /// method on [Maestro].
   const Maestro(
+    T initialValue, {
+    Key key,
+    EqualityComparer<T> equalityComparer,
+    Widget child,
+  }) : this._(
+          initialValue,
+          key: key,
+          equalityComparer: equalityComparer,
+          readOnly: false,
+          child: child,
+        );
+
+  /// Stores the [initialValue] and exposes it to its descendants.
+  ///
+  /// `equalityComparer` can optionally be passed to avoid unnecessarily
+  /// rebuilding dependents when [Maestro] is rebuilt but its `value`
+  /// did not change.
+  ///
+  /// Defaults to `(previous, next) => previous != next`.
+  ///
+  /// Its internal value can only be updated by its parent by recreating another
+  /// [Maestro] with a different value.
+  const Maestro.readOnly(
+    T value, {
+    Key key,
+    EqualityComparer<T> equalityComparer,
+    Widget child,
+  }) : this._(
+          value,
+          key: key,
+          equalityComparer: equalityComparer,
+          readOnly: true,
+          child: child,
+        );
+
+  const Maestro._(
     this.initialValue, {
     Key key,
     this.equalityComparer,
     this.child,
+    this.readOnly,
   }) : super(key: key);
 
   /// The initial value held by this widget.
   final T initialValue;
+
+  /// Indicates whether the value of this [Maestro] is read-only.
+  /// If true, the value cannot be written by descendants, but if the widget is
+  /// updated with a new [initialValue] then, its internal value is updated.
+  final bool readOnly;
 
   /// Used to compare old and new values in order to rebuild its descendants
   /// only when these values are not considered equals.
@@ -136,6 +181,16 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
     _inspect(oldValue, value, wrapper.action);
   }
 
+  void _write(_Wrapper<T> wrapper) {
+    assert(
+      !widget.readOnly,
+      'This Maestro<$T> is read-only and it cannot be updated by its '
+      'descendants. Only its parent can update its internal value by changing '
+      'the `value` provided to its constructor.',
+    );
+    _dispatch(wrapper);
+  }
+
   void _inspect(T oldValue, T value, Object action) {
     bool bubbling = true;
     _MaestroScope<MaestroInspector> inspector =
@@ -156,6 +211,15 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         value.play();
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(Maestro<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final T newValue = widget.initialValue;
+    if (widget.readOnly && _updateShouldNotify(value, newValue)) {
+      _dispatch(_Wrapper<T>(newValue, const WidgetUpdatedAction()));
     }
   }
 
@@ -283,13 +347,13 @@ extension MaestroBuildContextExtensions on BuildContext {
   // ignore: use_setters_to_change_properties
   /// {@macro  maestro.write}
   void write<T>(T value, [Object action]) {
-    _getMaestroScope<T>()?.state?._dispatch(_Wrapper<T>(value, action));
+    _getMaestroScope<T>()?.state?._write(_Wrapper<T>(value, action));
   }
 
   /// {@macro  maestro.readAndWrite}
   void readAndWrite<T>(Updater<T> updater, [Object action]) {
     final _MaestroScope<T> scope = _getMaestroScope<T>();
-    scope.state._dispatch(_Wrapper<T>(updater(scope.value), action));
+    scope.state._write(_Wrapper<T>(updater(scope.value), action));
   }
 
   /// {@macro  maestro.select}
