@@ -23,6 +23,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  freezed_annotation: ^0.7.1
+  equatable: ^1.2.0
+  maestro:
+    path: ../../packages/maestro
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -32,6 +36,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  freezed: ^0.10.9
+  build_runner: ^1.10.0
+  json_serializable: ^3.3.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
