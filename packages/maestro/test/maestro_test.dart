@@ -83,9 +83,9 @@ void main() {
       expect(value, equals(168));
     });
 
-    testWidgets('descendants cannot write a read-only ancestor',
-        (tester) async {
+    testWidgets('descendants cannot write a read-only Maestro', (tester) async {
       int buildCount = 0;
+      int onWriteValue = 0;
       BuildContext ctx;
       final Widget child = Builder(
         builder: (context) {
@@ -96,9 +96,20 @@ void main() {
         },
       );
 
-      await tester.pumpWidget(Maestro.readOnly(42, child: child));
+      await tester.pumpWidget(
+        Maestro<int>.readOnly(
+          42,
+          onWrite: (request) => onWriteValue = request.value,
+          child: child,
+        ),
+      );
       expect(buildCount, equals(1));
-      expect(() => Maestro.write(ctx, 84), throwsAssertionError);
+      ctx.write(84);
+
+      await tester.pump();
+
+      expect(ctx.read<int>(), 42);
+      expect(onWriteValue, 84);
     });
 
     testWidgets('does not rebuilt if value changed and writeable',

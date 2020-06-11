@@ -45,30 +45,29 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
     T value, {
     Key key,
     EqualityComparer<T> equalityComparer,
+    ValueChanged<WritingRequest<T>> onWrite,
     Widget child,
   }) : this._(
           value,
           key: key,
           equalityComparer: equalityComparer,
+          onWrite: onWrite,
           readOnly: true,
           child: child,
         );
 
   const Maestro._(
-    this.initialValue, {
+    this.value, {
     Key key,
     this.equalityComparer,
+    this.onWrite,
+    bool readOnly,
     this.child,
-    this.readOnly,
-  }) : super(key: key);
+  })  : _readOnly = readOnly,
+        super(key: key);
 
-  /// The initial value held by this widget.
-  final T initialValue;
-
-  /// Indicates whether the value of this [Maestro] is read-only.
-  /// If true, the value cannot be written by descendants, but if the widget is
-  /// updated with a new [initialValue] then, its internal value is updated.
-  final bool readOnly;
+  /// The value held by this widget.
+  final T value;
 
   /// Used to compare old and new values in order to rebuild its descendants
   /// only when these values are not considered equals.
@@ -76,17 +75,24 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
   /// Defaults to `(previous, next) => previous != next`.
   final EqualityComparer<T> equalityComparer;
 
+  /// Called for a [Maestro.readOnly] when a descendant want to write its value.
+  final ValueChanged<WritingRequest<T>> onWrite;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  final bool _readOnly;
+
   @override
   Maestro<T> copyWithNewChild(Widget newChild) {
-    return Maestro<T>(
-      initialValue,
+    return Maestro<T>._(
+      value,
       key: key,
       equalityComparer: equalityComparer,
+      onWrite: onWrite,
+      readOnly: _readOnly,
       child: newChild,
     );
   }
@@ -114,15 +120,15 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
     context.write(value, action);
   }
 
-  /// {@template maestro.readAndWrite}
+  /// {@template maestro.update}
   /// Gests and Sets the value from the nearest ancestor [Maestro<T>].
   /// {@endtemplate}
-  static void readAndWrite<T>(
+  static void update<T>(
     BuildContext context,
     Updater<T> updater, [
     Object action,
   ]) {
-    context.readAndWrite(updater, action);
+    context.update(updater, action);
   }
 
   /// {@template maestro.select}
@@ -166,45 +172,16 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
   }
 
   @override
-  _MaestroState createState() => _MaestroState<T>();
+  _MaestroState<T> createState() => _MaestroState<T>();
 }
 
 class _MaestroState<T> extends State<Maestro<T>> implements Score {
-  T get value => _value;
   T _value;
-  void _dispatch(_Wrapper<T> wrapper) {
-    final T oldValue = _value;
-
-    setState(() {
-      _value = wrapper.value;
-    });
-    _inspect(oldValue, value, wrapper.action);
-  }
-
-  void _write(_Wrapper<T> wrapper) {
-    assert(
-      !widget.readOnly,
-      'This Maestro<$T> is read-only and it cannot be updated by its '
-      'descendants. Only its parent can update its internal value by changing '
-      'the `value` provided to its constructor.',
-    );
-    _dispatch(wrapper);
-  }
-
-  void _inspect(T oldValue, T value, Object action) {
-    bool bubbling = true;
-    _MaestroScope<MaestroInspector> inspector =
-        context._getMaestroScope<MaestroInspector>();
-    while (inspector != null && bubbling) {
-      bubbling = !inspector.value.onAction(oldValue, value, action);
-      inspector = inspector.state.context._getMaestroScope<MaestroInspector>();
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    _value = widget.initialValue;
+    _value = widget.value;
     final T value = _value;
     if (value is Performer) {
       value.attach(this);
@@ -217,9 +194,9 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
   @override
   void didUpdateWidget(Maestro<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final T newValue = widget.initialValue;
-    if (widget.readOnly && _updateShouldNotify(value, newValue)) {
-      _dispatch(_Wrapper<T>(newValue, const WidgetUpdatedAction()));
+    final T newValue = widget.value;
+    if (widget._readOnly) {
+      _dispatch(WritingRequest<T>(newValue, const WidgetUpdatedAction()));
     }
   }
 
@@ -233,25 +210,50 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
   }
 
   @override
-  X read<X>() {
-    return Maestro.read<X>(context);
-  }
+  X read<X>() => context.read<X>();
 
   @override
-  void readAndWrite<X>(Updater<X> updater, [Object action]) {
-    Maestro.readAndWrite<X>(context, updater, action);
-  }
+  void update<X>(Updater<X> updater, [Object action]) =>
+      context.update<X>(updater, action);
 
   @override
-  void write<X>(X value, [Object action]) {
-    Maestro.write<X>(context, value, action);
+  void write<X>(X value, [Object action]) => context.write<X>(value, action);
+
+  void _write(WritingRequest<T> writingRequest) {
+    if (_updateShouldNotify(writingRequest.value)) {
+      if (widget._readOnly) {
+        if (widget.onWrite != null) {
+          widget.onWrite(writingRequest);
+        }
+      } else {
+        _dispatch(writingRequest);
+      }
+    }
   }
 
-  bool _updateShouldNotify(T oldValue, T newValue) {
+  void _dispatch(WritingRequest<T> writingRequest) {
+    final T oldValue = _value;
+    setState(() {
+      _value = writingRequest.value;
+    });
+    _inspect(oldValue, _value, writingRequest.action);
+  }
+
+  void _inspect(T oldValue, T value, Object action) {
+    bool bubbling = true;
+    _MaestroScope<MaestroInspector> inspector =
+        context._getMaestroScope<MaestroInspector>();
+    while (inspector != null && bubbling) {
+      bubbling = !inspector.value.onAction(oldValue, value, action);
+      inspector = inspector.state.context._getMaestroScope<MaestroInspector>();
+    }
+  }
+
+  bool _updateShouldNotify(T otherValue) {
     if (widget.equalityComparer != null) {
-      return !widget.equalityComparer(oldValue, newValue);
+      return !widget.equalityComparer(_value, otherValue);
     } else {
-      return oldValue != newValue;
+      return _value != otherValue;
     }
   }
 
@@ -265,30 +267,34 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
   }
 }
 
-@immutable
-class _Wrapper<T> {
-  const _Wrapper(this.value, this.action);
-  final Object action;
+/// Represents a writing request.
+class WritingRequest<T> {
+  /// Creates a [WritingRequest<T>].
+  const WritingRequest(this.value, this.action);
+
+  /// The new value to write.
   final T value;
+
+  /// The action.
+  final Object action;
 }
 
 class _MaestroScope<T> extends InheritedModel<_Aspect<T, dynamic>> {
   const _MaestroScope({
     Key key,
+    @required this.value,
+    @required this.state,
     Widget child,
-    this.value,
-    this.state,
-  }) : super(
-          key: key,
-          child: child,
-        );
+  })  : assert(state != null),
+        super(key: key, child: child);
 
   final T value;
+
   final _MaestroState<T> state;
 
   @override
   bool updateShouldNotify(_MaestroScope<T> oldWidget) {
-    return state._updateShouldNotify(oldWidget.value, value);
+    return state._updateShouldNotify(oldWidget.value);
   }
 
   @override
@@ -297,10 +303,7 @@ class _MaestroScope<T> extends InheritedModel<_Aspect<T, dynamic>> {
     Set<_Aspect<T, dynamic>> dependencies,
   ) {
     return dependencies.any((aspect) {
-      return aspect.updateShouldNotify(
-        oldWidget.value,
-        value,
-      );
+      return aspect.updateShouldNotify(oldWidget.value, value);
     });
   }
 
@@ -344,16 +347,15 @@ extension MaestroBuildContextExtensions on BuildContext {
     return _getMaestroScope<T>()?.value;
   }
 
-  // ignore: use_setters_to_change_properties
   /// {@macro  maestro.write}
   void write<T>(T value, [Object action]) {
-    _getMaestroScope<T>()?.state?._write(_Wrapper<T>(value, action));
+    _getMaestroScope<T>()?.state?._write(WritingRequest<T>(value, action));
   }
 
-  /// {@macro  maestro.readAndWrite}
-  void readAndWrite<T>(Updater<T> updater, [Object action]) {
+  /// {@macro  maestro.update}
+  void update<T>(Updater<T> updater, [Object action]) {
     final _MaestroScope<T> scope = _getMaestroScope<T>();
-    scope.state._write(_Wrapper<T>(updater(scope.value), action));
+    scope.state._write(WritingRequest<T>(updater(scope.value), action));
   }
 
   /// {@macro  maestro.select}

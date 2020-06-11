@@ -22,7 +22,7 @@ void main() {
       await tester.pumpWidget(
         Maestros(
           [
-            const Maestro(1),
+            const Maestro.readOnly(1),
             Maestro(_FetchWhenAttachedComposer<int>((int x) => value = x)),
           ],
           child: const SizedBox(),
@@ -34,7 +34,7 @@ void main() {
       await tester.pumpWidget(
         Maestros(
           [
-            const Maestro(2),
+            const Maestro.readOnly(2),
             Maestro(_FetchWhenAttachedComposer<int>((int x) => value = x)),
           ],
           child: const SizedBox(),
