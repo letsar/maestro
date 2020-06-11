@@ -126,7 +126,7 @@ To execute some code when the `Composer` is initialized, you can override the `p
 
 ## Limitations
 
-The value passed to a `Maestro` is only used for its initial state. Therefore if you want to change the current value from a parent you need to use the `Maestro.readOnly` constructor. By doing this, only the parent can modify the value. If a descendant try to write the value, an `AssertionError` will be thrown.
+The value passed to a `Maestro` is only used for its initial state. Therefore if you want to change the current value from a parent you need to use the `Maestro.readOnly` constructor. You'll have a `onWrite` argument allowing you to intercept any writing request to a read-only Maestro.
 
 ## Advanced use
 
