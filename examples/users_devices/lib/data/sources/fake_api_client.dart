@@ -37,8 +37,6 @@ class FakeApiClient with Composer {
   Future<List<User>> getUsers() => _users.toList().withFakeDelay();
 
   Future<List<Device>> getDevices() => _devices.toList().withFakeDelay();
-
-  Future<AssignmentResult> assign(int deviceId, int userId) {}
 }
 
 extension _Extensions<T> on T {

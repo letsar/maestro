@@ -46,7 +46,7 @@ class _Page extends StatelessWidget {
             (context, index) {
               return Interceptor(
                 value: users[index],
-                onChanged: (value) => userStore.write(value),
+                onChanged: (value) => context.write(userStore.write(value)),
                 child: const _Assignments(),
               );
             },
@@ -65,17 +65,14 @@ class _UnassignedDevices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Device> unassignedDevices =
-        context.select<Store<int, Device>, List<Device>>(
-            (deviceStore) => deviceStore.unassignedDevices());
+    final List<Device> unassignedDevices = context.select(
+        (Store<int, Device> deviceStore) => deviceStore.unassignedDevices());
 
-    // Should be read-only.
     return DecoratedBox(
       decoration: BoxDecoration(color: Colors.white),
-      child: Maestro(
+      child: Maestro.readOnly(
         unassignedDevices,
         child: const _DeviceList(),
-        key: UniqueKey(),
       ),
     );
   }
@@ -97,7 +94,7 @@ class _DeviceList extends StatelessWidget {
       itemBuilder: (context, index) {
         return Interceptor(
           value: devices[index],
-          onChanged: (value) => deviceStore.write(value),
+          onChanged: (value) => context.write(deviceStore.write(value)),
           child: const _Device(),
         );
       },
@@ -157,6 +154,8 @@ class _UserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final User user = context.listen<User>();
+    final bool connected = context.select((Store<int, Device> deviceStore) =>
+        user.deviceIds?.any((id) => deviceStore.read(id).connected) ?? false);
 
     return DragTarget<int>(
       onWillAccept: (deviceId) => !user.deviceIds.contains(deviceId),
@@ -164,7 +163,11 @@ class _UserAvatar extends StatelessWidget {
         context.read<DeviceAssigmentComposer>().assign(deviceId, user.id);
       },
       builder: (context, candidateData, rejectedData) {
-        return _Item(text: user.initials);
+        return _Item(
+          text: user.initials,
+          backgroundColor:
+              connected ? Colors.green.shade900 : Colors.blue.shade900,
+        );
       },
     );
   }
@@ -177,17 +180,20 @@ class _AssignedDevices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Store<int, Device> deviceStore = context.read<Store<int, Device>>();
-    final List<Device> assignedDevices = context.select<User, List<Device>>(
-        (user) => user.deviceIds.map((id) => deviceStore.read(id)).toList());
+    // We only interested in two things:
+    // - The user's assigned device ids
+    // - These devices themselves
+    final List<int> deviceIds = context.select((User user) => user.deviceIds);
 
-    // Should be read-only.
+    final List<Device> assignedDevices = context.select(
+        (Store<int, Device> deviceStore) =>
+            deviceIds.map((id) => deviceStore.read(id)).toList());
+
     return DecoratedBox(
       decoration: BoxDecoration(color: Colors.white),
-      child: Maestro(
+      child: Maestro.readOnly(
         assignedDevices,
         child: const _DeviceList(),
-        key: UniqueKey(),
       ),
     );
   }

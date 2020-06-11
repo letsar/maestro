@@ -20,7 +20,7 @@ class Interceptor<T> extends StatelessWidget {
     return Maestros(
       [
         Maestro(MaestroInspector(_onAction)),
-        Maestro<T>(value, key: UniqueKey()),
+        Maestro<T>(value, key: ValueKey(value)),
       ],
       child: child,
     );

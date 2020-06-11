@@ -56,4 +56,7 @@ abstract class Relocatable<T extends Widget> {
 class WidgetUpdatedAction {
   /// Creates a [WidgetUpdatedAction].
   const WidgetUpdatedAction();
+
+  @override
+  String toString() => 'maestro.widget_updated';
 }
