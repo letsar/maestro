@@ -1,5 +1,4 @@
 import 'package:maestro/maestro.dart';
-import 'package:users_devices/data/entities/assignment_result.dart';
 import 'package:users_devices/models/device.dart';
 import 'package:users_devices/models/user.dart';
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:maestro/maestro.dart';
 import 'package:users_devices/composers/device_assignment.dart';
 import 'package:users_devices/core/store.dart';
-import 'package:users_devices/core/widgets/interceptor.dart';
 import 'package:users_devices/core/widgets/sliver_pinned_header.dart';
 import 'package:users_devices/models/device.dart';
 import 'package:users_devices/models/user.dart';
@@ -44,9 +43,9 @@ class _Page extends StatelessWidget {
           itemExtent: 120,
           delegate: SliverChildBuilderDelegate(
             (context, index) {
-              return Interceptor(
-                value: users[index],
-                onChanged: (value) => context.write(userStore.write(value)),
+              return Maestro<User>.readOnly(
+                users[index],
+                onWrite: (r) => context.write(userStore.write(r.value)),
                 child: const _Assignments(),
               );
             },
@@ -92,9 +91,9 @@ class _DeviceList extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       itemCount: devices.length,
       itemBuilder: (context, index) {
-        return Interceptor(
-          value: devices[index],
-          onChanged: (value) => context.write(deviceStore.write(value)),
+        return Maestro<Device>.readOnly(
+          devices[index],
+          onWrite: (r) => context.write(deviceStore.write(r.value)),
           child: const _Device(),
         );
       },
