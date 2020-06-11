@@ -17,7 +17,7 @@ abstract class Score {
   X read<X>();
 
   /// Updates the value from the nearest ancestor [Maestro<X>].
-  void readAndWrite<X>(Updater<X> updater, [Object action]);
+  void update<X>(Updater<X> updater, [Object action]);
 
   /// Sets the value from the nearest ancestor [Maestro<X>].
   void write<X>(X value, [Object action]);

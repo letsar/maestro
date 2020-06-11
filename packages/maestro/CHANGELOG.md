@@ -1,3 +1,11 @@
+## [0.7.0]
+### Added
+- A `onWrite` argument for `Maestro.readOnly` called when a descendants wants to write a new value.
+
+### Changed
+- `readAndWrite` methods renamed to `update`.
+- `Maestro.initialValue` renamed to `value`.
+
 ## [0.6.0]
 ### Added
 - A `readOnly` constructor on `Maestro` allowing a `Maestro` to be read but not updated by its descendants, and only updated by its parent.
