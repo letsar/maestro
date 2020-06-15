@@ -1,3 +1,7 @@
+## [0.7.1]
+### Added
+- A `update` method for `Composer`.
+- 
 ## [0.7.0]
 ### Added
 - A `onWrite` argument for `Maestro.readOnly` called when a descendants wants to write a new value.

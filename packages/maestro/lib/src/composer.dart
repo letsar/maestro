@@ -20,6 +20,11 @@ mixin Composer implements Performer {
   @protected
   T read<T>() => _score.read<T>();
 
+  /// Updates the value of the nearest [Maestro<T>] ancestor in the tree.
+  @protected
+  void update<T>(Updater<T> updater, [Object action]) =>
+      _score.update<T>(updater, action);
+
   /// Writes the value of the nearest [Maestro<T>] ancestor in the tree.
   @protected
   void write<T>(T value, [Object action]) => _score.write(value, action);
