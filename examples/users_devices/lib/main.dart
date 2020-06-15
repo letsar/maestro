@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         Maestro(UserStoreComposer()),
         Maestro(DeviceStoreComposer()),
         Maestro(DeviceAssigmentComposer()),
-        Maestro(FakeConnectionStatusHandler()),
+        // Maestro(FakeConnectionStatusHandler()),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -42,6 +42,6 @@ class MyApp extends StatelessWidget {
 
 bool _logAction<T>(T oldValue, T newValue, Object action) {
   final String description = action == null ? '' : '($action)';
-  debugPrint('Maestro$description: $oldValue => $newValue');
+  // debugPrint('Maestro$description: $oldValue => $newValue');
   return true;
 }

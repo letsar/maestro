@@ -30,8 +30,7 @@ class _Page extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Store<int, User> userStore = context.listen<Store<int, User>>();
-    final List<User> users = userStore.values.toList();
+    _debugPrint('_Page');
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -39,20 +38,37 @@ class _Page extends StatelessWidget {
           height: 120,
           child: _UnassignedDevices(),
         ),
-        SliverFixedExtentList(
-          itemExtent: 120,
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return Maestro<User>.readOnly(
-                users[index],
-                onWrite: (r) => context.write(userStore.write(r.value)),
-                child: const _Assignments(),
-              );
-            },
-            childCount: users.length,
-          ),
-        )
+        const _Users(),
       ],
+    );
+  }
+}
+
+class _Users extends StatelessWidget {
+  const _Users({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final List<User> users = context
+        .select((Store<int, User> userStore) => userStore.values.toList());
+
+    _debugPrint('_Users');
+
+    return SliverFixedExtentList(
+      itemExtent: 120,
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          return Maestro<User>.readOnly(
+            users[index],
+            onWrite: (r) =>
+                context.write(context.read<Store<int, User>>().write(r.value)),
+            child: const _Assignments(),
+          );
+        },
+        childCount: users.length,
+      ),
     );
   }
 }
@@ -66,6 +82,7 @@ class _UnassignedDevices extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Device> unassignedDevices = context.select(
         (Store<int, Device> deviceStore) => deviceStore.unassignedDevices());
+    _debugPrint('_UnassignedDevices');
 
     return DecoratedBox(
       decoration: BoxDecoration(color: Colors.white),
@@ -86,6 +103,8 @@ class _DeviceList extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Device> devices = context.listen<List<Device>>();
     final Store<int, Device> deviceStore = context.read<Store<int, Device>>();
+
+    _debugPrint('_DeviceList');
 
     return ListView.builder(
       scrollDirection: Axis.horizontal,
@@ -108,15 +127,18 @@ class _Device extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Device device = context.listen<Device>();
+    final int deviceId = context.select((Device device) => device.id);
+    final bool connected = context.select((Device device) => device.connected);
+
+    _debugPrint('_Device $deviceId');
 
     final Widget item = _Item(
-      backgroundColor: device.connected ? Colors.green : Colors.grey,
-      text: device.id.toString(),
+      backgroundColor: connected ? Colors.green : Colors.grey,
+      text: deviceId.toString(),
     );
 
     return Draggable<int>(
-      data: device.id,
+      data: deviceId,
       feedback: item,
       child: item,
       childWhenDragging: Opacity(
@@ -134,13 +156,24 @@ class _Assignments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        const _UserAvatar(),
-        const Expanded(
-          child: _AssignedDevices(),
-        ),
-      ],
+    _debugPrint('_Assignments ${context.read<User>().initials}');
+
+    final List<Device> assignedDevices = context.select(
+        (Store<int, Device> deviceStore) => context
+            .select((User user) => user.deviceIds)
+            .map((id) => deviceStore.read(id))
+            .toList());
+
+    return Maestro.readOnly(
+      assignedDevices,
+      child: Row(
+        children: <Widget>[
+          const _UserAvatar(),
+          const Expanded(
+            child: _AssignedDevices(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -152,21 +185,27 @@ class _UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final User user = context.listen<User>();
-    final bool connected = context.select((Store<int, Device> deviceStore) =>
-        user.deviceIds?.any((id) => deviceStore.read(id).connected) ?? false);
+    final bool connected = context.select((List<Device> assignedDevices) =>
+        assignedDevices.any((device) => device.connected));
+    final String initials = context.select((User user) => user.initials);
+
+    _debugPrint('_UserAvatar $initials');
+
+    final Widget child = _Item(
+      text: initials,
+      backgroundColor: connected ? Colors.green.shade900 : Colors.blue.shade900,
+    );
 
     return DragTarget<int>(
-      onWillAccept: (deviceId) => !user.deviceIds.contains(deviceId),
+      onWillAccept: (deviceId) =>
+          !context.read<User>().deviceIds.contains(deviceId),
       onAccept: (deviceId) {
-        context.read<DeviceAssigmentComposer>().assign(deviceId, user.id);
+        context
+            .read<DeviceAssigmentComposer>()
+            .assign(deviceId, context.read<User>().id);
       },
       builder: (context, candidateData, rejectedData) {
-        return _Item(
-          text: user.initials,
-          backgroundColor:
-              connected ? Colors.green.shade900 : Colors.blue.shade900,
-        );
+        return child;
       },
     );
   }
@@ -179,21 +218,11 @@ class _AssignedDevices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // We only interested in two things:
-    // - The user's assigned device ids
-    // - These devices themselves
-    final List<int> deviceIds = context.select((User user) => user.deviceIds);
-
-    final List<Device> assignedDevices = context.select(
-        (Store<int, Device> deviceStore) =>
-            deviceIds.map((id) => deviceStore.read(id)).toList());
+    _debugPrint('_AssignedDevices ${context.read<User>().initials}');
 
     return DecoratedBox(
       decoration: BoxDecoration(color: Colors.white),
-      child: Maestro.readOnly(
-        assignedDevices,
-        child: const _DeviceList(),
-      ),
+      child: const _DeviceList(),
     );
   }
 }
@@ -213,6 +242,8 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _debugPrint('_Item $text');
+
     return Padding(
       padding: const EdgeInsets.all(8),
       child: CircleAvatar(
@@ -229,4 +260,11 @@ extension on Store<int, Device> {
   List<Device> unassignedDevices() {
     return values.where((device) => device.ownerId == null).toList();
   }
+}
+
+int _debugCount = 0;
+
+void _debugPrint(String text) {
+  _debugCount++;
+  debugPrint('$_debugCount $text');
 }
