@@ -6,10 +6,17 @@ import 'package:undo_redo/memory_performer.dart';
 final Memory _memory = Memory();
 
 void main() {
-  runApp(MyApp());
+  runApp(MyMaestros(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyMaestros extends StatelessWidget {
+  const MyMaestros({
+    Key key,
+    this.child,
+  }) : super(key: key);
+
+  final Widget child;
+
   @override
   Widget build(BuildContext context) {
     return Maestros(
@@ -17,16 +24,24 @@ class MyApp extends StatelessWidget {
         Maestro(MaestroInspector(onAction)),
         Maestro<MaestroInspector>(_memory),
         Maestro(0),
+        Maestro(Colors.blue),
         Maestro(MemoryPerformer(_memory)),
       ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: const MyHomePage(),
+      child: child,
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: context.listen<MaterialColor>(),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      home: const MyHomePage(),
     );
   }
 }
@@ -55,6 +70,14 @@ class MyHomePage extends StatelessWidget {
               '$counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const _ColorChanger(color: Colors.blue),
+                const _ColorChanger(color: Colors.red),
+                const _ColorChanger(color: Colors.green),
+              ],
+            )
           ],
         ),
       ),
@@ -92,7 +115,42 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
+class _ColorChanger extends StatelessWidget {
+  const _ColorChanger({
+    Key key,
+    this.color,
+  }) : super(key: key);
+
+  final MaterialColor color;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.write(color, 'skin'),
+      child: Container(
+        color: color,
+        margin: const EdgeInsets.all(8),
+        height: 50,
+        width: 50,
+      ),
+    );
+  }
+}
+
 bool onAction<T>(T oldValue, T value, Object action) {
-  print('[$action] from $oldValue to $value');
+  final String oldLog = oldValue.toLog();
+  final String newLog = value.toLog();
+  print('[$action] from $oldLog to $newLog');
   return true;
+}
+
+extension LogStringExtensions<T> on T {
+  String toLog() {
+    final T value = this;
+    if (value is MaterialColor) {
+      return 'Color(0x${value.value.toRadixString(16).padLeft(8, '0')})';
+    } else {
+      return toString();
+    }
+  }
 }
