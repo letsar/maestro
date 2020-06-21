@@ -29,6 +29,14 @@ mixin Composer implements Performer {
   @protected
   void write<T>(T value, [Object action]) => _score.write(value, action);
 
+  /// {@macro maestro.undo}
+  @protected
+  void undo<T>() => _score.undo<T>();
+
+  /// {@macro maestro.redo}
+  @protected
+  void redo<T>() => _score.redo<T>();
+
   @override
   void detach() {}
 }

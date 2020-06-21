@@ -3,11 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:maestro/src/common.dart';
 import 'package:maestro/src/inspector.dart';
+import 'package:maestro/src/memento.dart';
 
 /// A widget exposing a value of type [T] to its descendants.
 /// Its descendants can read the value or write a new value. When the value is
 /// replaced, all descendants who listen a specific [Maestro] will be rebuilt.
-class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
+class Maestro<T> extends StatefulWidget with Relocatable<Maestro<T>> {
   /// Stores the [initialValue] and exposes it to its descendants.
   ///
   /// `equalityComparer` can optionally be passed to avoid unnecessarily
@@ -171,6 +172,12 @@ class Maestro<T> extends StatefulWidget implements Relocatable<Maestro<T>> {
     return context.select(selector, equalityComparer: equalityComparer);
   }
 
+  /// {@macro maestro.undo}
+  static void undo<T>(BuildContext context) => context.undo<T>();
+
+  /// {@macro maestro.redo}
+  static void redo<T>(BuildContext context) => context.redo<T>();
+
   @override
   _MaestroState<T> createState() => _MaestroState<T>();
 }
@@ -219,6 +226,12 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
   @override
   void write<X>(X value, [Object action]) => context.write<X>(value, action);
 
+  @override
+  void redo<X>() => context.redo<X>();
+
+  @override
+  void undo<X>() => context.undo<X>();
+
   void _write(WritingRequest<T> writingRequest) {
     if (_updateShouldNotify(writingRequest.value)) {
       if (widget._readOnly) {
@@ -241,11 +254,10 @@ class _MaestroState<T> extends State<Maestro<T>> implements Score {
 
   void _inspect(T oldValue, T value, Object action) {
     bool bubbling = true;
-    _MaestroScope<MaestroInspector> inspector =
-        context._getMaestroScope<MaestroInspector>();
+    _MaestroScope<Inspector> inspector = context._getMaestroScope<Inspector>();
     while (inspector != null && bubbling) {
       bubbling = !inspector.value.onAction(oldValue, value, action);
-      inspector = inspector.state.context._getMaestroScope<MaestroInspector>();
+      inspector = inspector.state.context._getMaestroScope<Inspector>();
     }
   }
 
@@ -337,28 +349,28 @@ class _Aspect<T, R> {
 
 /// Extensions for [BuildContext].
 extension MaestroBuildContextExtensions on BuildContext {
-  /// {@macro  maestro.listen}
+  /// {@macro maestro.listen}
   T listen<T>() {
     return _dependOnMaestroScope<T>()?.value;
   }
 
-  /// {@macro  maestro.read}
+  /// {@macro maestro.read}
   T read<T>() {
     return _getMaestroScope<T>()?.value;
   }
 
-  /// {@macro  maestro.write}
+  /// {@macro maestro.write}
   void write<T>(T value, [Object action]) {
     _getMaestroScope<T>()?.state?._write(WritingRequest<T>(value, action));
   }
 
-  /// {@macro  maestro.update}
+  /// {@macro maestro.update}
   void update<T>(Updater<T> updater, [Object action]) {
     final _MaestroScope<T> scope = _getMaestroScope<T>();
     scope.state._write(WritingRequest<T>(updater(scope.value), action));
   }
 
-  /// {@macro  maestro.select}
+  /// {@macro maestro.select}
   R select<T, R>(
     R Function(T value) selector, {
     EqualityComparer<R> equalityComparer,

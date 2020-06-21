@@ -21,6 +21,12 @@ abstract class Score {
 
   /// Sets the value from the nearest ancestor [Maestro<X>].
   void write<X>(X value, [Object action]);
+
+  /// {@macro maestro.undo}
+  void undo<X>();
+
+  /// {@macro maestro.redo}
+  void redo<X>();
 }
 
 /// An interface for classes that wants to perform actions on some [Maestro]
@@ -46,7 +52,7 @@ abstract class Performer {
 
 /// An interface for widgets, with one child, able to be relocated at another
 /// location in the widget tree.
-abstract class Relocatable<T extends Widget> {
+mixin Relocatable<T extends Widget> on Widget {
   /// Creates a new widget of type [T] with the specified [newChild].
   T copyWithNewChild(Widget newChild);
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:maestro/maestro.dart';
+import 'package:maestro/src/common.dart';
 import 'package:maestro/src/maestro.dart';
 
 /// {@template maestro.selector}

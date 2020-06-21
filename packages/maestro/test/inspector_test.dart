@@ -15,7 +15,7 @@ void main() {
         return true;
       }
 
-      final MaestroInspector inspector = MaestroInspector(onAction);
+      final Inspector inspector = Inspector(onAction);
       final DefaultComposer composer = DefaultComposer();
 
       await tester.pumpWidget(
@@ -47,7 +47,7 @@ void main() {
         return true;
       }
 
-      final MaestroInspector inspector = MaestroInspector(onAction);
+      final Inspector inspector = Inspector(onAction);
       final DefaultComposer composer = DefaultComposer();
 
       await tester.pumpWidget(
@@ -84,8 +84,8 @@ void main() {
         return false;
       }
 
-      final MaestroInspector inspector01 = MaestroInspector(onAction01);
-      final MaestroInspector inspector02 = MaestroInspector(onAction02);
+      final Inspector inspector01 = Inspector(onAction01);
+      final Inspector inspector02 = Inspector(onAction02);
       final DefaultComposer composer = DefaultComposer();
 
       await tester.pumpWidget(
@@ -128,8 +128,8 @@ void main() {
         return true;
       }
 
-      final MaestroInspector inspector01 = MaestroInspector(onAction01);
-      final MaestroInspector inspector02 = MaestroInspector(onAction02);
+      final Inspector inspector01 = Inspector(onAction01);
+      final Inspector inspector02 = Inspector(onAction02);
       final DefaultComposer composer = DefaultComposer();
 
       await tester.pumpWidget(
@@ -155,6 +155,61 @@ void main() {
         '01 IntStorage: 1 => 2',
         '02 StringStorage: a => b',
       ]);
+    });
+  });
+
+  group('MaestroInspector', () {
+    testWidgets('exposes a Maestro<Inspector>', (tester) async {
+      final List<String> logs = <String>[];
+
+      bool onAction<T>(T old, T value, Object action) {
+        logs.add('$old => $value');
+        return true;
+      }
+
+      final Inspector inspector = Inspector(onAction);
+
+      BuildContext ctx;
+
+      await tester.pumpWidget(
+        MaestroInspector.custom(
+          inspector,
+          child: Builder(builder: (context) {
+            ctx = context;
+            return const SizedBox();
+          }),
+        ),
+      );
+
+      expect(ctx.read<Inspector>(), inspector);
+    });
+
+    testWidgets('inside a Maestros exposes a Maestro<Inspector>',
+        (tester) async {
+      final List<String> logs = <String>[];
+
+      bool onAction<T>(T old, T value, Object action) {
+        logs.add('$old => $value');
+        return true;
+      }
+
+      final Inspector inspector = Inspector(onAction);
+
+      BuildContext ctx;
+
+      await tester.pumpWidget(
+        Maestros(
+          [
+            MaestroInspector.custom(inspector),
+          ],
+          child: Builder(builder: (context) {
+            ctx = context;
+            return const SizedBox();
+          }),
+        ),
+      );
+
+      expect(ctx.read<Inspector>(), inspector);
     });
   });
 }

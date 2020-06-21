@@ -1,7 +1,17 @@
+## [0.8.0]
+### Modified
+- `MaestroInspector` renamed to `Inspector`.
+
+### Added
+- A specifc Maestro called `MaestroInspector` which always expose an `Inspector`.
+- A specifc Maestro called `MaestroMemento` used for undo/redo actions.
+- Extensions methods `undo<T>` and `redo<T>` on `BuildContext` for undoing/redoing actions on type `T`.
+- Methods `undo<T>` and `redo<T>` on `Composer` and `Maestro` static methods.
+
 ## [0.7.1]
 ### Added
-- A `update` method for `Composer`.
-- 
+- An `update` method for `Composer`.
+
 ## [0.7.0]
 ### Added
 - A `onWrite` argument for `Maestro.readOnly` called when a descendants wants to write a new value.

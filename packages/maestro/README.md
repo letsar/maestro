@@ -48,7 +48,7 @@ Maestros(
 
 ## Manipulating your app state
 
-There are four ways to manipulate the data exposed with `Maestro` depending on what you want.
+There are many ways to manipulate the data exposed with `Maestro` depending on what you want.
 
 ### I want to read the value and rebuild my widget every time the value changes.
 
@@ -130,11 +130,11 @@ The value passed to a `Maestro` is only used for its initial state. Therefore if
 
 ## Advanced use
 
-### MaestroInspector
+### Inspector
 
-All `Maestro`s can report when their value changed to the nearest `Maestro<MaestroInspector>`. It can be used to log all the intermediates states that lead to a bug for example.
+All `Maestro`s can report when their value changed to the nearest `Maestro<Inspector>`. It can be used to log all the intermediates states that lead to a bug for example.
 
-You can declare an inspector like this:
+You can declare an inspector through a specific `Maestro` like this:
 
 ```dart
 bool onAction<T>(T oldValue, T newValue, Object action){
@@ -144,7 +144,7 @@ bool onAction<T>(T oldValue, T newValue, Object action){
 ...
 Maestros(
   [
-    Maestro(MaestroInspector(onAction)),
+    MaestroInspector(onAction),
     Maestro(Data())
     Maestro(Composer())
     ...
@@ -153,9 +153,52 @@ Maestros(
 )
 ```
 
-Then when you use `write` or `readAndWrite` you can pass an optional object called `action`. This action will be provided to the inspector so that you can log the action along with the previous and current values.
+You can also implements your own inspector like this:
+```dart
+class _Memento<T> implements Inspector {
+  @override
+  bool onAction<X>(X oldValue, X newValue, Object action) {
+    // Do what you want.
+    return false;
+  }
+}
+...
+Maestros(
+  [
+    MaestroInspector.custom(onAction),
+    Maestro(Data())
+    Maestro(Composer())
+    ...
+  ],
+  child : SubTree(),
+)
+```
 
-You can have multiple `MaestroInspector` in the tree. The action is bubbling up until there is one `MaestroInspector` which returns true.
+Then when you use `write` or `update` you can pass an optional object called `action`. This action will be provided to the inspector so that you can log the action along with the previous and current values.
+
+You can have multiple `Inspector` in the tree. The action is bubbling up until there is one `Inspector` which returns true.
+
+### Undo/Redo
+
+This packages helps you to implement a undo/redo feature within your app. To do so, you'll have to use another specific `Maestro` called `MaestroMemento` before the maestro holding your state:
+
+```dart
+Maestros(
+  const [
+    MaestroMemento<int>(),
+    Maestro<int>(0),
+  ],
+  child: SubTree(),
+),
+```
+
+Then within your sub tree, you will be able to call `undo<T>` and `redo<T>` methods on the `BuildContext` or in a `Composer`.
+
+By default, a memento can remember up to 16 entries, but you can define this value for matching your needs. To do so, you need to set the `maxCapacity` argument:
+
+```dart
+const MaestroMemento<int>(maxCapacity: 256)
+```
 
 ## Changelog
 
