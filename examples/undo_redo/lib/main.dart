@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:maestro/maestro.dart';
-import 'package:undo_redo/memory.dart';
-import 'package:undo_redo/memory_performer.dart';
-
-final Memory _memory = Memory();
 
 void main() {
   runApp(MyMaestros(child: MyApp()));
@@ -21,11 +17,10 @@ class MyMaestros extends StatelessWidget {
   Widget build(BuildContext context) {
     return Maestros(
       [
-        Maestro(MaestroInspector(onAction)),
-        Maestro<MaestroInspector>(_memory),
-        Maestro(0),
-        Maestro(Colors.blue),
-        Maestro(MemoryPerformer(_memory)),
+        MaestroInspector(onAction),
+        const MaestroMemento<Object>(maxCapacity: 256),
+        const Maestro(0),
+        const Maestro(Colors.blue),
       ],
       child: child,
     );
@@ -96,7 +91,7 @@ class MyHomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(4),
             child: FloatingActionButton(
-              onPressed: () => context.read<MemoryPerformer>().undo(),
+              onPressed: () => context.undo<Object>(),
               tooltip: 'Undo',
               child: Icon(Icons.undo),
             ),
@@ -104,7 +99,7 @@ class MyHomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(4),
             child: FloatingActionButton(
-              onPressed: () => context.read<MemoryPerformer>().redo(),
+              onPressed: () => context.redo<Object>(),
               tooltip: 'Redo',
               child: Icon(Icons.redo),
             ),

@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       [
         // This is a special component used to listen any changes from
         // Maestro descendants.
-        const Maestro(Inspector(_onAction)),
+        MaestroInspector(_onAction),
 
         // This is how we expose data.
         const Maestro(Counter(0)),

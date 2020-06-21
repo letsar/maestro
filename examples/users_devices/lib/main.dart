@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Maestros(
       [
-        Maestro(MaestroInspector(_logAction)),
+        MaestroInspector(_logAction),
         Maestro(FakeApiClient()),
         Maestro(Store<int, User>((user) => user.id)),
         Maestro(Store<int, Device>((device) => device.id)),
