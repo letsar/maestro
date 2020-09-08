@@ -1,27 +1,26 @@
 import 'package:maestro/maestro.dart';
-import 'package:users_devices/core/store.dart';
+import 'package:users_devices/composers/device_store.dart';
+import 'package:users_devices/composers/user_store.dart';
 import 'package:users_devices/models/device.dart';
 import 'package:users_devices/models/user.dart';
 
 class DeviceAssigmentComposer with Composer {
-  Store<int, User> get _userStore => read<Store<int, User>>();
+  UserStore get _userStore => read<UserStore>();
 
-  Store<int, Device> get _deviceStore => read<Store<int, Device>>();
+  DeviceStore get _deviceStore => read<DeviceStore>();
 
   /// Assign the device with this [deviceId] to the user with this [userId].
   void assign(int deviceId, int userId) {
-    final User user = _userStore.read(userId);
-    final Device device = _deviceStore.read(deviceId);
-
-    Store<int, User> newUserStore = _userStore;
+    final User user = _userStore.get(userId);
+    final Device device = _deviceStore.get(deviceId);
 
     if (user != null && device != null) {
       if (device.ownerId != null) {
         // The device was assigned to another user before.
         // After the assignment, it should only by assigned to one person only.
-        final User owner = _userStore.read(device.ownerId);
+        final User owner = _userStore.get(device.ownerId);
         final User newOwner = owner.newDeviceIds((l) => l..remove(deviceId));
-        newUserStore = newUserStore.write(newOwner);
+        _userStore.overwrite(newOwner);
       }
 
       // We change the owner of the device.
@@ -31,8 +30,8 @@ class DeviceAssigmentComposer with Composer {
       final User newUser = user.newDeviceIds((l) => l..add(deviceId));
 
       // We persist the data.
-      write(newUserStore.write(newUser));
-      write(_deviceStore.write(newDevice));
+      write(_userStore.overwrite(newUser));
+      write(_deviceStore.overwrite(newDevice));
     }
   }
 }

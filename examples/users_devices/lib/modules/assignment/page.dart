@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:maestro/maestro.dart';
 import 'package:users_devices/composers/device_assignment.dart';
-import 'package:users_devices/core/store.dart';
+import 'package:users_devices/composers/device_store.dart';
+import 'package:users_devices/composers/user_store.dart';
 import 'package:users_devices/core/widgets/sliver_pinned_header.dart';
 import 'package:users_devices/models/device.dart';
 import 'package:users_devices/models/user.dart';
@@ -51,8 +52,8 @@ class _Users extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<User> users = context
-        .select((Store<int, User> userStore) => userStore.values.toList());
+    final List<User> users =
+        context.select((Map<int, User> userMap) => userMap.values.toList());
 
     _debugPrint('_Users');
 
@@ -62,8 +63,7 @@ class _Users extends StatelessWidget {
         (context, index) {
           return Maestro<User>.readOnly(
             users[index],
-            onWrite: (r) =>
-                context.write(context.read<Store<int, User>>().write(r.value)),
+            onWrite: (r) => context.read<UserStore>().overwrite(r.value),
             child: const _Assignments(),
           );
         },
@@ -80,8 +80,8 @@ class _UnassignedDevices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Device> unassignedDevices = context.select(
-        (Store<int, Device> deviceStore) => deviceStore.unassignedDevices());
+    final List<Device> unassignedDevices = context
+        .select((Map<int, Device> deviceMap) => deviceMap.unassignedDevices());
     _debugPrint('_UnassignedDevices');
 
     return DecoratedBox(
@@ -102,7 +102,6 @@ class _DeviceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Device> devices = context.listen<List<Device>>();
-    final Store<int, Device> deviceStore = context.read<Store<int, Device>>();
 
     _debugPrint('_DeviceList');
 
@@ -112,7 +111,7 @@ class _DeviceList extends StatelessWidget {
       itemBuilder: (context, index) {
         return Maestro<Device>.readOnly(
           devices[index],
-          onWrite: (r) => context.write(deviceStore.write(r.value)),
+          onWrite: (r) => context.read<DeviceStore>().overwrite(r.value),
           child: const _Device(),
         );
       },
@@ -159,9 +158,9 @@ class _Assignments extends StatelessWidget {
     _debugPrint('_Assignments ${context.read<User>().initials}');
 
     final List<Device> assignedDevices = context.select(
-        (Store<int, Device> deviceStore) => context
+        (Map<int, Device> deviceMap) => context
             .select((User user) => user.deviceIds)
-            .map((id) => deviceStore.read(id))
+            .map((id) => deviceMap[id])
             .toList());
 
     return Maestro.readOnly(
@@ -256,7 +255,7 @@ class _Item extends StatelessWidget {
   }
 }
 
-extension on Store<int, Device> {
+extension on Map<int, Device> {
   List<Device> unassignedDevices() {
     return values.where((device) => device.ownerId == null).toList();
   }

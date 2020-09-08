@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:maestro/maestro.dart';
 
 void main() {
-  runApp(MyMaestros(child: MyApp()));
+  runApp(const MyMaestros(child: MyApp()));
+}
+
+bool onAction<T>(T oldValue, T value, Object action) {
+  final String oldLog = oldValue.toLog();
+  final String newLog = value.toLog();
+  print('[$action] from $oldLog to $newLog');
+  return true;
 }
 
 class MyMaestros extends StatelessWidget {
@@ -28,6 +35,10 @@ class MyMaestros extends StatelessWidget {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({
+    Key key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -130,13 +141,6 @@ class _ColorChanger extends StatelessWidget {
       ),
     );
   }
-}
-
-bool onAction<T>(T oldValue, T value, Object action) {
-  final String oldLog = oldValue.toLog();
-  final String newLog = value.toLog();
-  print('[$action] from $oldLog to $newLog');
-  return true;
 }
 
 extension LogStringExtensions<T> on T {

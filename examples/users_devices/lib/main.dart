@@ -4,7 +4,6 @@ import 'package:users_devices/composers/device_assignment.dart';
 import 'package:users_devices/composers/device_store.dart';
 import 'package:users_devices/composers/fake_connection_status_handler.dart';
 import 'package:users_devices/composers/user_store.dart';
-import 'package:users_devices/core/store.dart';
 import 'package:users_devices/data/sources/fake_api_client.dart';
 import 'package:users_devices/models/device.dart';
 import 'package:users_devices/models/user.dart';
@@ -21,12 +20,12 @@ class MyApp extends StatelessWidget {
       [
         MaestroInspector(_logAction),
         Maestro(FakeApiClient()),
-        Maestro(Store<int, User>((user) => user.id)),
-        Maestro(Store<int, Device>((device) => device.id)),
-        Maestro(UserStoreComposer()),
-        Maestro(DeviceStoreComposer()),
+        Maestro(<int, User>{}),
+        Maestro(<int, Device>{}),
+        Maestro(UserStore()),
+        Maestro(DeviceStore()),
         Maestro(DeviceAssigmentComposer()),
-        // Maestro(FakeConnectionStatusHandler()),
+        Maestro(FakeConnectionStatusHandler()),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

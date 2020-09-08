@@ -294,19 +294,22 @@ class WritingRequest<T> {
 class _MaestroScope<T> extends InheritedModel<_Aspect<T, dynamic>> {
   const _MaestroScope({
     Key key,
-    @required this.value,
+    @required T value,
     @required this.state,
     Widget child,
   })  : assert(state != null),
+        _value = value,
         super(key: key, child: child);
 
-  final T value;
+  final T _value;
+
+  T get value => state._value;
 
   final _MaestroState<T> state;
 
   @override
   bool updateShouldNotify(_MaestroScope<T> oldWidget) {
-    return state._updateShouldNotify(oldWidget.value);
+    return state._updateShouldNotify(oldWidget._value);
   }
 
   @override
@@ -315,14 +318,14 @@ class _MaestroScope<T> extends InheritedModel<_Aspect<T, dynamic>> {
     Set<_Aspect<T, dynamic>> dependencies,
   ) {
     return dependencies.any((aspect) {
-      return aspect.updateShouldNotify(oldWidget.value, value);
+      return aspect.updateShouldNotify(oldWidget._value, _value);
     });
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<T>('value', value));
+    properties.add(DiagnosticsProperty<T>('value', _value));
   }
 }
 

@@ -25,7 +25,7 @@ const List<Device> _initialDevices = <Device>[
   Device(id: 9, name: 'Device 9'),
 ];
 
-class FakeApiClient with Composer {
+class FakeApiClient {
   FakeApiClient()
       : _users = _initialUsers.toList(),
         _devices = _initialDevices.toList();

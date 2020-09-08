@@ -1,11 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:users_devices/models/identifiable.dart';
 
 part 'user.freezed.dart';
 part 'user.g.dart';
 
 @freezed
-abstract class User with _$User {
+abstract class User with _$User implements Identifiable {
   const factory User({
     @required int id,
     @required String firstName,

@@ -61,9 +61,7 @@ void main() {
 
       composer.store(2);
 
-      // The value should still be 1 because 2 will be readable after the next
-      // frame.
-      expect(composer.fetch<int>(), equals(1));
+      expect(composer.fetch<int>(), equals(2));
 
       await tester.pump();
 

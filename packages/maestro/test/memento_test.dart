@@ -31,8 +31,6 @@ void main() {
       final Inspector newInspector = _DefaultInspector();
       ctx.write<Inspector>(newInspector);
 
-      await tester.pump();
-
       internalInspector = ctx.read<Inspector>();
       expect(identical(internalInspector, newInspector), isFalse);
     });
@@ -57,21 +55,16 @@ void main() {
 
       ctx.write<int>(2);
       ctx.write<int>(3);
-      await tester.pump();
       expect(ctx.read<int>(), 3);
 
       ctx.undo<int>();
       ctx.undo<int>();
-      await tester.pump();
       expect(ctx.read<int>(), 2);
 
       ctx.write<int>(3);
       ctx.write<int>(4);
-      await tester.pump();
       ctx.undo<int>();
-      await tester.pump();
       ctx.undo<int>();
-      await tester.pump();
       expect(ctx.read<int>(), 3);
     });
 
@@ -95,13 +88,8 @@ void main() {
         );
 
         ctx.write<int>(2);
-        expect(ctx.read<int>(), equals(0));
-        await tester.pump();
         expect(ctx.read<int>(), equals(2));
         ctx.undo<int>();
-        // the new state is propagated on the next frame.
-        expect(ctx.read<int>(), equals(2));
-        await tester.pump();
         expect(ctx.read<int>(), equals(0));
       });
 
@@ -132,7 +120,6 @@ void main() {
         );
 
         ctx.write<int>(2);
-        await tester.pump();
         ctx.undo<int>();
         expect(lastAction, isA<UndoAction>());
       });
@@ -157,12 +144,9 @@ void main() {
         );
 
         ctx.write<int>(2);
-        await tester.pump();
         ctx.write<int>(4);
-        await tester.pump();
         ctx.undo<int>();
         ctx.undo<int>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(0));
       });
 
@@ -216,15 +200,11 @@ void main() {
         );
 
         ctx.write<int>(2);
-        await tester.pump();
         ctx.write('efgh');
-        await tester.pump();
         ctx.undo<Object>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(2));
         expect(ctx.read<String>(), equals('abcd'));
         ctx.undo<Object>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(0));
         expect(ctx.read<String>(), equals('abcd'));
       });
@@ -250,13 +230,9 @@ void main() {
         );
 
         ctx.write<int>(2);
-        await tester.pump();
         ctx.undo<int>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(0));
         ctx.redo<int>();
-        expect(ctx.read<int>(), equals(0));
-        await tester.pump();
         expect(ctx.read<int>(), equals(2));
       });
 
@@ -287,9 +263,7 @@ void main() {
         );
 
         ctx.write<int>(2);
-        await tester.pump();
         ctx.undo<int>();
-        await tester.pump();
         ctx.redo<int>();
         expect(lastAction, isA<RedoAction>());
       });
@@ -314,16 +288,12 @@ void main() {
         );
 
         ctx.write<int>(2);
-        await tester.pump();
         ctx.write<int>(4);
-        await tester.pump();
         ctx.undo<int>();
         ctx.undo<int>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(0));
         ctx.redo<int>();
         ctx.redo<int>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(4));
       });
 
@@ -382,11 +352,8 @@ void main() {
         );
 
         ctx.write<int>(2);
-        await tester.pump();
         ctx.undo<int>();
-        await tester.pump();
         ctx.write<int>(4);
-        await tester.pump();
         ctx.redo<int>();
         expect(logs, ['Null', 'UndoAction', 'Null']);
       });
@@ -412,23 +379,17 @@ void main() {
         );
 
         ctx.write<int>(2);
-        await tester.pump();
         ctx.write('efgh');
-        await tester.pump();
         ctx.undo<Object>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(2));
         expect(ctx.read<String>(), equals('abcd'));
         ctx.undo<Object>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(0));
         expect(ctx.read<String>(), equals('abcd'));
         ctx.redo<Object>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(2));
         expect(ctx.read<String>(), equals('abcd'));
         ctx.redo<Object>();
-        await tester.pump();
         expect(ctx.read<int>(), equals(2));
         expect(ctx.read<String>(), equals('efgh'));
       });
