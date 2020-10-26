@@ -2,6 +2,12 @@
 
 [![Pub](https://img.shields.io/pub/v/maestro.svg)](https://pub.dartlang.org/packages/maestro)
 
+***
+
+**This experimentation led to build [binder](https://github.com/letsar/binder) which better in a lot of ways. Thus this package is now deprecated.**
+
+***
+
 A simple way for orchestrating the state of an entire Flutter application.
 
 This is an experimentation around `InheritedWidget`s and `StatefulWidget`s for managing the state of an entire Flutter application.
